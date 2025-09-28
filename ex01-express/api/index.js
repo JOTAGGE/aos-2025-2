@@ -1,91 +1,31 @@
-import "dotenv/config";
-import cors from "cors";
-import express from "express";
+import 'dotenv/config';
+import cors from 'cors';
+import express from 'express';
 
-import models, { sequelize } from "./models";
-import routes from "./routes";
+import models, { sequelize } from './models';
+import routes from './routes';
 
+// 1. Cria a base de operações
 const app = express();
-app.set("trust proxy", true);
 
-var corsOptions = {
-  origin: ["http://example.com", "*"],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-};
-app.use(cors(corsOptions));
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path} - ${req.ip}`);
-  next();
-});
-const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
-sequelize.sync({ force: eraseDatabaseOnSync });
-
-// Código para conseguir extrair o conteúdo do body da mensagem HTTP
-// e armazenar na propriedade req.body (utiliza o body-parser)
+// 2. Define os protocolos de comunicação (Middlewares)
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Código para injetar no context o usuário que está logado e os models
-// app.use(async (req, res, next) => {
-//   req.context = {
-//     models,
-//     me: await models.User.findByPk(1),
-//   };
-//   next();
-// });
+// 3. Conecta as rotas de combate (Endpoints)
+// Nós não precisamos do lixo legado. Apenas nossas rotas de CRUD.
+app.use('/users', routes.user);
+app.use('/messages', routes.message);
 
-app.use("/", routes.root);
-app.use("/session", routes.session);
-app.use("/users", routes.user);
-app.use("/messages", routes.message);
+// 4. Protocolo de Sincronização com o Banco de Dados
+// Esta seção garante que nossas tabelas existam antes de qualquer combate.
+const eraseDatabaseOnSync = process.env.ERASE_DATABASE === 'true';
 
-const port = process.env.PORT ?? 3000;
+sequelize.sync({ force: eraseDatabaseOnSync }).then(() => {
+  // A Vercel não usa app.listen. Nós apenas logamos que a base está pronta.
+  console.log('Sincronização com o depósito de munição (DB) concluída com sucesso.');
+});
 
-// sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
-//   if (eraseDatabaseOnSync) {
-//     createUsersWithMessages();
-//   }
-
-  app.listen(port, () => {
-    console.log(`Example app listening on port ${port}!`);
-  });
-// });
-
-const createUsersWithMessages = async () => {
-  await models.User.create(
-    {
-      username: "rwieruch",
-      email: "rwieruch@email.com",
-      messages: [
-        {
-          text: "Published the Road to learn React",
-        },
-        {
-          text: "Published also the Road to learn Express + PostgreSQL",
-        },
-      ],
-    },
-    {
-      include: [models.Message],
-    }
-  );
-
-  await models.User.create(
-    {
-      username: "ddavids",
-      email: "ddavids@email.com",
-      messages: [
-        {
-          text: "Happy to release ...",
-        },
-        {
-          text: "Published a complete ...",
-        },
-      ],
-    },
-    {
-      include: [models.Message],
-    }
-  );
-};
+// 5. Exporta a base para que a Vercel possa comandá-la.
+export default app;
