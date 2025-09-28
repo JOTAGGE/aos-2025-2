@@ -1,0 +1,15 @@
+# Dependências e pacotes instalados localmente
+# Seus aliados não precisam da sua oficina de armas. Eles têm a própria deles.
+# Eles só precisam da lista de peças (package.json) para construir uma igual.
+node_modules/
+
+# Arquivos de ambiente e segredos de estado
+# VOCÊ NUNCA, JAMAIS, SOB NENHUMA CIRCUNSTÂNCIA, ENVIA SEU LIVRO DE CÓDIGOS SECRETOS.
+# Se o inimigo captura isso, a guerra acabou para você.
+.env
+
+# Logs e arquivos de depuração
+# O lixo e os cartuchos vazios da sua operação local.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

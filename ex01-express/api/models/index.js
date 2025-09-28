@@ -16,6 +16,7 @@ const sequelize = new Sequelize(process.env.POSTGRES_URL, {
     },
   },
   dialectModule: require("pg"),
+  omitNull: true
 });
 
 const models = {

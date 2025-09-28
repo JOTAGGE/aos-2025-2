@@ -18,6 +18,8 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${req.ip}`);
   next();
 });
+const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
+sequelize.sync({ force: eraseDatabaseOnSync });
 
 // Código para conseguir extrair o conteúdo do body da mensagem HTTP
 // e armazenar na propriedade req.body (utiliza o body-parser)
@@ -25,13 +27,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Código para injetar no context o usuário que está logado e os models
-app.use(async (req, res, next) => {
-  req.context = {
-    models,
-    me: await models.User.findByPk(1),
-  };
-  next();
-});
+// app.use(async (req, res, next) => {
+//   req.context = {
+//     models,
+//     me: await models.User.findByPk(1),
+//   };
+//   next();
+// });
 
 app.use("/", routes.root);
 app.use("/session", routes.session);
@@ -40,17 +42,15 @@ app.use("/messages", routes.message);
 
 const port = process.env.PORT ?? 3000;
 
-const eraseDatabaseOnSync = process.env.ERASE_DATABASE === "true";
-
-sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
-  if (eraseDatabaseOnSync) {
-    createUsersWithMessages();
-  }
+// sequelize.sync({ force: eraseDatabaseOnSync }).then(async () => {
+//   if (eraseDatabaseOnSync) {
+//     createUsersWithMessages();
+//   }
 
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`);
   });
-});
+// });
 
 const createUsersWithMessages = async () => {
   await models.User.create(

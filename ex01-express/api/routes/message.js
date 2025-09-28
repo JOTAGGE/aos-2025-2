@@ -1,36 +1,61 @@
-import { v4 as uuidv4 } from "uuid";
-import { Router } from "express";
+import { Router } from 'express';
+import models from '../models';
 
 const router = Router();
 
-router.get("/", (req, res) => {
-  return res.send(Object.values(req.context.models.messages));
+// ROTA: Listar todas as mensagens (GET)
+router.get('/', async (req, res) => {
+  try {
+    const messages = await models.Message.findAll();
+    return res.status(200).json(messages);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro interno do servidor.', details: error.message });
+  }
 });
 
-router.get("/:messageId", (req, res) => {
-  return res.send(req.context.models.messages[req.params.messageId]);
+// ROTA: Obter uma mensagem específica pelo ID (GET)
+router.get('/:messageId', async (req, res) => {
+  try {
+    const message = await models.Message.findByPk(req.params.messageId);
+    if (!message) {
+      return res.status(404).send('Mensagem não encontrada.');
+    }
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro interno do servidor.', details: error.message });
+  }
 });
 
-router.post("/", (req, res) => {
-  const id = uuidv4();
-  const message = {
-    id,
-    text: req.body.text,
-    userId: req.context.me.id,
-  };
-
-  req.context.models.messages[id] = message;
-
-  return res.send(message);
+// ROTA: Enviar uma nova mensagem (POST)
+router.post('/', async (req, res) => {
+  try {
+    const { text, userId } = req.body;
+    if (!text || !userId) {
+      return res.status(400).send('O texto da mensagem e o ID do usuário são obrigatórios.');
+    }
+    const newMessage = await models.Message.create({
+      text,
+      userId,
+    });
+    return res.status(201).json(newMessage);
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro interno do servidor.', details: error.message });
+  }
 });
 
-router.delete("/:messageId", (req, res) => {
-  const { [req.params.messageId]: message, ...otherMessages } =
-    req.context.models.messages;
-
-  req.context.models.messages = otherMessages;
-
-  return res.send(message);
+// ROTA: Eliminar uma mensagem (DELETE)
+router.delete('/:messageId', async (req, res) => {
+  try {
+    const result = await models.Message.destroy({
+      where: { id: req.params.messageId },
+    });
+    if (result === 0) {
+      return res.status(404).send('Mensagem não encontrada.');
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro interno do servidor.', details: error.message });
+  }
 });
 
 export default router;
