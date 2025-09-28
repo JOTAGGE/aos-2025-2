@@ -2,10 +2,10 @@
   "name": "ex01-express",
   "version": "1.0.0",
   "description": "Tutorial de Node.JS + Express + PostgreSQL",
-  "main": "api/index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node api/index.js",
-    "dev": "nodemon --exec babel-node api/index.js"
+    "dev": "next dev",
+    "start": "node server.js"
   },
   "keywords": [
     "node",
