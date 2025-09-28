@@ -1,4 +1,3 @@
-// api/index.js
 import express from 'express';
 import cors from 'cors';
 import serverless from 'serverless-http';
@@ -16,4 +15,4 @@ app.use('/messages', routes.message);
 
 sequelize.sync().then(() => console.log("DB sincronizado."));
 
-export default serverless(app);
+export const handler = serverless(app);
