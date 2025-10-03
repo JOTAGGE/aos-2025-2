@@ -1,5 +1,5 @@
 import Sequelize from "sequelize";
-
+import getTarefaModel from './tarefa';
 import getUserModel from "./user";
 import getMessageModel from "./message";
 
@@ -22,6 +22,7 @@ const sequelize = new Sequelize(process.env.POSTGRES_URL, {
 const models = {
   User: getUserModel(sequelize, Sequelize),
   Message: getMessageModel(sequelize, Sequelize),
+  Tarefa: getTarefaModel(sequelize, Sequelize),
 };
 
 Object.keys(models).forEach((key) => {
